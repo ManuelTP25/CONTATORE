@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contatore Samsung OM32DX</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 60px 80px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            max-width: 600px;
+            width: 90%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .counter-display {
+            font-size: 8em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 40px 0;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            min-height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .counter-display.animate {
+            transform: scale(1.1);
+            color: #764ba2;
+        }
+
+        .buttons-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 40px;
+            margin-top: 50px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 25px 40px;
+            font-size: 2em;
+            font-weight: bold;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-increment {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-increment:hover {
+            background: linear-gradient(135deg, #45a049, #4CAF50);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-increment:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 10px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-decrement {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: white;
+            box-shadow: 0 6px 20px rgba(244, 67, 54, 0.3);
+        }
+
+        .btn-decrement:hover {
+            background: linear-gradient(135deg, #d32f2f, #f44336);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(244, 67, 54, 0.4);
+        }
+
+        .btn-decrement:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 10px rgba(244, 67, 54, 0.3);
+        }
+
+        .btn-symbol {
+            font-size: 1.5em;
+            margin-right: 15px;
+        }
+
+        .reset-btn {
+            margin-top: 40px;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            background: linear-gradient(135deg, #757575, #616161);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            opacity: 0.8;
+        }
+
+        .reset-btn:hover {
+            opacity: 1;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Animazioni per il feedback tattile */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .btn-pressed {
+            animation: pulse 0.2s ease;
+        }
+
+        /* Ottimizzazioni per touch screen */
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 30px;
+            }
+            
+            .counter-display {
+                font-size: 6em;
+            }
+            
+            .buttons-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .btn {
+                font-size: 1.5em;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Contatore Samsung OM32DX</h1>
+        
+        <div class="counter-display" id="counterDisplay">0</div>
+        
+        <div class="buttons-container">
+            <button class="btn btn-increment" id="incrementBtn">
+                <span class="btn-symbol">+</span>
+                Incrementa
+            </button>
+            
+            <button class="btn btn-decrement" id="decrementBtn">
+                <span class="btn-symbol">−</span>
+                Decrementa
+            </button>
+        </div>
+        
+        <button class="reset-btn" id="resetBtn">Reset</button>
+        
+        <div style="margin-top: 30px; display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+            <button class="reset-btn" id="reportBtn" style="background: linear-gradient(135deg, #2196F3, #1976D2);">
+                📊 Genera Report
+            </button>
+            <button class="reset-btn" id="clearHistoryBtn" style="background: linear-gradient(135deg, #FF9800, #F57C00);">
+                🗑️ Cancella Storico
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal per il report -->
+    <div id="reportModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background: white; padding: 30px; border-radius: 15px; max-width: 80%; max-height: 80%; overflow-y: auto; position: relative;">
+            <span id="closeModal" style="position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #666;">&times;</span>
+            <h2 style="margin-bottom: 20px; color: #333;">📊 Report Giornaliero Contatore</h2>
+            <div id="reportContent"></div>
+            <div style="margin-top: 20px; text-align: center;">
+                <button id="downloadReport" style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px;">
+                    💾 Scarica Report
+                </button>
+                <button id="emailReport" style="padding: 10px 20px; background: #2196F3; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    📧 Invia Email
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variabile per il contatore
+        let counter = 0;
+        
+        // Array per memorizzare i cambiamenti del contatore
+        let counterHistory = [];
+        
+        // Riferimenti agli elementi DOM
+        const counterDisplay = document.getElementById('counterDisplay');
+        const incrementBtn = document.getElementById('incrementBtn');
+        const decrementBtn = document.getElementById('decrementBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        
+        // Funzione per registrare un cambiamento del contatore
+        function logCounterChange(oldValue, newValue, action) {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('it-IT', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit' 
+            });
+            const dateString = now.toLocaleDateString('it-IT');
+            
+            counterHistory.push({
+                timestamp: now,
+                timeString: timeString,
+                dateString: dateString,
+                oldValue: oldValue,
+                newValue: newValue,
+                action: action,
+                difference: newValue - oldValue
+            });
+            
+            // Mantieni solo gli ultimi 1000 record per evitare problemi di memoria
+            if (counterHistory.length > 1000) {
+                counterHistory = counterHistory.slice(-1000);
+            }
+        }
+        
+        // Funzione per aggiornare il display del contatore
+        function updateCounterDisplay() {
+            counterDisplay.textContent = counter;
+            
+            // Animazione del display
+            counterDisplay.classList.add('animate');
+            setTimeout(() => {
+                counterDisplay.classList.remove('animate');
+            }, 300);
+        }
+        
+        // Funzione per animare il pulsante premuto
+        function animateButton(button) {
+            button.classList.add('btn-pressed');
+            setTimeout(() => {
+                button.classList.remove('btn-pressed');
+            }, 200);
+        }
+        
+        // Event listeners per i pulsanti
+        incrementBtn.addEventListener('click', function() {
+            const oldValue = counter;
+            counter++;
+            logCounterChange(oldValue, counter, 'Incremento');
+            updateCounterDisplay();
+            animateButton(this);
+        });
+        
+        decrementBtn.addEventListener('click', function() {
+            const oldValue = counter;
+            counter--;
+            logCounterChange(oldValue, counter, 'Decremento');
+            updateCounterDisplay();
+            animateButton(this);
+        });
+        
+        resetBtn.addEventListener('click', function() {
+            const oldValue = counter;
+            counter = 0;
+            logCounterChange(oldValue, counter, 'Reset');
+            updateCounterDisplay();
+            animateButton(this);
+        });
+        
+        // Gestione del report
+        const reportBtn = document.getElementById('reportBtn');
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+        const reportModal = document.getElementById('reportModal');
+        const closeModal = document.getElementById('closeModal');
+        const reportContent = document.getElementById('reportContent');
+        const downloadReport = document.getElementById('downloadReport');
+        const emailReport = document.getElementById('emailReport');
+        
+        // Funzione per generare il report
+        function generateReport() {
+            const today = new Date().toLocaleDateString('it-IT');
+            const todayHistory = counterHistory.filter(entry => entry.dateString === today);
+            
+            if (todayHistory.length === 0) {
+                return `
+                    <div style="text-align: center; color: #666; padding: 20px;">
+                        <p>Nessuna attività registrata per oggi (${today})</p>
+                    </div>
+                `;
+            }
+            
+            let reportHtml = `
+                <div style="margin-bottom: 20px;">
+                    <h3>📅 Data: ${today}</h3>
+                    <h3>📊 Valore attuale: ${counter}</h3>
+                    <h3>📈 Numero totale operazioni: ${todayHistory.length}</h3>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <h4>📋 Dettaglio operazioni:</h4>
+                    <div style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                            <thead>
+                                <tr style="background: #f5f5f5; font-weight: bold;">
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Ora</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Azione</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Valore Precedente</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Nuovo Valore</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">Variazione</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            todayHistory.forEach(entry => {
+                const variationColor = entry.difference > 0 ? '#4CAF50' : entry.difference < 0 ? '#f44336' : '#666';
+                const variationSymbol = entry.difference > 0 ? '+' : '';
+                
+                reportHtml += `
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd;">${entry.timeString}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">${entry.action}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">${entry.oldValue}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">${entry.newValue}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; color: ${variationColor}; font-weight: bold;">${variationSymbol}${entry.difference}</td>
+                    </tr>
+                `;
+            });
+            
+            reportHtml += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            // Statistiche aggiuntive
+            const increments = todayHistory.filter(entry => entry.difference > 0).length;
+            const decrements = todayHistory.filter(entry => entry.difference < 0).length;
+            const resets = todayHistory.filter(entry => entry.action === 'Reset').length;
+            
+            reportHtml += `
+                <div style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 5px;">
+                    <h4>📊 Statistiche giornaliere:</h4>
+                    <ul style="list-style: none; padding: 0; margin: 10px 0;">
+                        <li style="padding: 5px 0;">🔼 Incrementi: ${increments}</li>
+                        <li style="padding: 5px 0;">🔽 Decrementi: ${decrements}</li>
+                        <li style="padding: 5px 0;">🔄 Reset: ${resets}</li>
+                        <li style="padding: 5px 0;">⏰ Prima operazione: ${todayHistory[0]?.timeString || 'N/A'}</li>
+                        <li style="padding: 5px 0;">⏰ Ultima operazione: ${todayHistory[todayHistory.length - 1]?.timeString || 'N/A'}</li>
+                    </ul>
+                </div>
+            `;
+            
+            return reportHtml;
+        }
+        
+        // Funzione per scaricare il report
+        function downloadReportFile() {
+            const today = new Date().toLocaleDateString('it-IT');
+            const todayHistory = counterHistory.filter(entry => entry.dateString === today);
+            
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Ora,Azione,Valore Precedente,Nuovo Valore,Variazione\n";
+            
+            todayHistory.forEach(entry => {
+                csvContent += `${entry.timeString},${entry.action},${entry.oldValue},${entry.newValue},${entry.difference}\n`;
+            });
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `report_contatore_${today.replace(/\//g, '-')}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // Funzione per inviare report via email
+        function sendReportEmail() {
+            const today = new Date().toLocaleDateString('it-IT');
+            const todayHistory = counterHistory.filter(entry => entry.dateString === today);
+            
+            let emailBody = `Report Contatore Samsung OM32DX - ${today}\n\n`;
+            emailBody += `Valore attuale: ${counter}\n`;
+            emailBody += `Numero totale operazioni: ${todayHistory.length}\n\n`;
+            emailBody += `Dettaglio operazioni:\n`;
+            emailBody += `Ora\t\tAzione\t\tValore Prec.\tNuovo Valore\tVariazione\n`;
+            emailBody += `${'='.repeat(70)}\n`;
+            
+            todayHistory.forEach(entry => {
+                emailBody += `${entry.timeString}\t${entry.action}\t\t${entry.oldValue}\t\t${entry.newValue}\t\t${entry.difference}\n`;
+            });
+            
+            const subject = `Report Contatore Samsung OM32DX - ${today}`;
+            const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
+            
+            window.open(mailtoLink);
+        }
+        
+        // Event listeners per il report
+        reportBtn.addEventListener('click', function() {
+            reportContent.innerHTML = generateReport();
+            reportModal.style.display = 'flex';
+        });
+        
+        clearHistoryBtn.addEventListener('click', function() {
+            if (confirm('Sei sicuro di voler cancellare tutto lo storico? Questa operazione non può essere annullata.')) {
+                counterHistory = [];
+                alert('Storico cancellato con successo!');
+            }
+        });
+        
+        closeModal.addEventListener('click', function() {
+            reportModal.style.display = 'none';
+        });
+        
+        downloadReport.addEventListener('click', downloadReportFile);
+        emailReport.addEventListener('click', sendReportEmail);
+        
+        // Chiudi modal cliccando fuori
+        reportModal.addEventListener('click', function(e) {
+            if (e.target === reportModal) {
+                reportModal.style.display = 'none';
+            }
+        });
+        
+        // Touch event handlers per una migliore responsività su touch screen
+        [incrementBtn, decrementBtn, resetBtn, reportBtn, clearHistoryBtn].forEach(button => {
+            button.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                this.style.transform = 'scale(0.95)';
+            });
+            
+            button.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                this.style.transform = '';
+            });
+        });
+        
+        // Gestione dei tasti della tastiera (opzionale)
+        document.addEventListener('keydown', function(e) {
+            switch(e.key) {
+                case 'ArrowUp':
+                case '+':
+                    incrementBtn.click();
+                    break;
+                case 'ArrowDown':
+                case '-':
+                    decrementBtn.click();
+                    break;
+                case 'r':
+                case 'R':
+                    if (!e.ctrlKey) resetBtn.click();
+                    break;
+                case 'g':
+                case 'G':
+                    reportBtn.click();
+                    break;
+            }
+        });
+        
+        // Inizializzazione
+        updateCounterDisplay();
+        
+        // Registra l'avvio dell'applicazione
+        logCounterChange(0, 0, 'Avvio applicazione');
+        
+        // Prevenzione dello zoom su doppio tap (importante per touch screen)
+        document.addEventListener('touchstart', function(e) {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        });
+        
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(e) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    </script>
+</body>
+</html>
